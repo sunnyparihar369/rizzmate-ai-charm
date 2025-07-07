@@ -149,6 +149,10 @@
     background: var(--gradient-card);
   }
   
+  .bg-gradient-card {
+    background: var(--gradient-card);
+  }
+  
   .text-gradient {
     background: var(--gradient-romantic);
     -webkit-background-clip: text;
