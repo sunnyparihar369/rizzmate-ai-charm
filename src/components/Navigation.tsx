@@ -14,13 +14,34 @@ const Navigation = () => {
           
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-foreground hover:text-primary transition-smooth">
+            <a 
+              href="#features" 
+              className="text-foreground hover:text-primary transition-smooth cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               Features
             </a>
-            <a href="#how-it-works" className="text-foreground hover:text-primary transition-smooth">
+            <a 
+              href="#how-it-works" 
+              className="text-foreground hover:text-primary transition-smooth cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               How It Works
             </a>
-            <a href="#pricing" className="text-foreground hover:text-primary transition-smooth">
+            <a 
+              href="#pricing" 
+              className="text-foreground hover:text-primary transition-smooth cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               Pricing
             </a>
           </div>
@@ -33,12 +54,25 @@ const Navigation = () => {
                   Sign In
                 </Button>
               </SignInButton>
-              <Button variant="romantic" size="sm">
+              <Button 
+                variant="romantic" 
+                size="sm"
+                onClick={() => {
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
                 Get Started
               </Button>
             </SignedOut>
             <SignedIn>
-              <Button variant="romantic" size="sm">
+              <Button 
+                variant="romantic" 
+                size="sm"
+                onClick={() => {
+                  // Navigate to dashboard - for now scroll to features
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
                 Dashboard
               </Button>
               <UserButton />

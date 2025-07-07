@@ -48,10 +48,24 @@ const Hero = () => {
           
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeInUp" style={{ animationDelay: '0.6s' }}>
-            <Button variant="hero" size="xl" className="text-lg">
+            <Button 
+              variant="hero" 
+              size="xl" 
+              className="text-lg"
+              onClick={() => {
+                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               Start Charming Now ✨
             </Button>
-            <Button variant="soft" size="xl" className="text-lg bg-white/10 backdrop-blur-sm text-white border-white/30 hover:bg-white/20">
+            <Button 
+              variant="soft" 
+              size="xl" 
+              className="text-lg bg-white/10 backdrop-blur-sm text-white border-white/30 hover:bg-white/20"
+              onClick={() => {
+                document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               See How It Works
             </Button>
           </div>

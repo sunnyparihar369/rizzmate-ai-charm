@@ -23,10 +23,24 @@ const CTA = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Button variant="hero" size="xl" className="text-lg bg-white text-primary hover:bg-white/90">
+            <Button 
+              variant="hero" 
+              size="xl" 
+              className="text-lg bg-white text-primary hover:bg-white/90"
+              onClick={() => {
+                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               Start Your Free Trial ✨
             </Button>
-            <Button variant="soft" size="xl" className="text-lg bg-white/10 backdrop-blur-sm text-white border-white/30 hover:bg-white/20">
+            <Button 
+              variant="soft" 
+              size="xl" 
+              className="text-lg bg-white/10 backdrop-blur-sm text-white border-white/30 hover:bg-white/20"
+              onClick={() => {
+                document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               Watch Demo Video
             </Button>
           </div>
