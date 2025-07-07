@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 
 const Navigation = () => {
   return (
@@ -26,12 +27,22 @@ const Navigation = () => {
           
           {/* Auth Buttons */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" className="hidden sm:inline-flex">
-              Sign In
-            </Button>
-            <Button variant="romantic" size="sm">
-              Get Started
-            </Button>
+            <SignedOut>
+              <SignInButton>
+                <Button variant="ghost" className="hidden sm:inline-flex">
+                  Sign In
+                </Button>
+              </SignInButton>
+              <Button variant="romantic" size="sm">
+                Get Started
+              </Button>
+            </SignedOut>
+            <SignedIn>
+              <Button variant="romantic" size="sm">
+                Dashboard
+              </Button>
+              <UserButton />
+            </SignedIn>
           </div>
         </div>
       </div>
