@@ -8,6 +8,7 @@ const corsHeaders = {
 interface GeminiRequest {
   prompt: string;
   context?: string;
+  image?: string; // base64 encoded image
 }
 
 serve(async (req) => {
@@ -17,7 +18,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, context }: GeminiRequest = await req.json();
+    const { prompt, context, image }: GeminiRequest = await req.json();
 
     if (!prompt) {
       throw new Error('Prompt is required');
@@ -30,6 +31,21 @@ serve(async (req) => {
 
     const systemPrompt = context || "You are a helpful dating and relationship assistant for RizzMate. Provide friendly, supportive, and engaging advice.";
 
+    // Prepare content parts
+    const contentParts: any[] = [{
+      text: `${systemPrompt}\n\nUser: ${prompt}`
+    }];
+
+    // Add image if provided
+    if (image) {
+      contentParts.push({
+        inline_data: {
+          mime_type: "image/jpeg",
+          data: image
+        }
+      });
+    }
+
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
@@ -37,9 +53,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         contents: [{
-          parts: [{
-            text: `${systemPrompt}\n\nUser: ${prompt}`
-          }]
+          parts: contentParts
         }],
         generationConfig: {
           temperature: 0.9,

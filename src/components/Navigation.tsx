@@ -83,13 +83,6 @@ const Navigation = () => {
               </Button>
             </SignedOut>
             <SignedIn>
-              <Button 
-                variant="romantic" 
-                size="sm"
-                onClick={() => navigate('/dashboard')}
-              >
-                Dashboard
-              </Button>
               <UserButton />
             </SignedIn>
           </div>
