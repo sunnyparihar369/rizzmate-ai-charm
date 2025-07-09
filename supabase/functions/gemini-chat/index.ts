@@ -74,7 +74,7 @@ serve(async (req) => {
         'X-Title': 'RizzMate'
       },
       body: JSON.stringify({
-        model: image ? "meta-llama/llama-3.3-70b-instruct:free" : "meta-llama/llama-3.3-70b-instruct:free",
+        model: image ? "gpt-4o" : "meta-llama/llama-3.1-8b-instruct:free",
         messages: messages,
         temperature: 0.9,
         max_tokens: 2048,
@@ -85,15 +85,17 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`OpenRouter API error: ${errorData.error?.message || 'Unknown error'}`);
+      const errorText = await response.text();
+      console.error('OpenRouter API error:', response.status, errorText);
+      throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
     const generatedText = data.choices?.[0]?.message?.content;
 
     if (!generatedText) {
-      throw new Error('No response generated from DeepSeek');
+      console.error('No response from AI, full data:', data);
+      throw new Error('No response generated from AI');
     }
 
     return new Response(JSON.stringify({ 
