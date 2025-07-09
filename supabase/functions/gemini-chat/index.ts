@@ -5,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface GeminiRequest {
+interface ChatRequest {
   prompt: string;
   context?: string;
   image?: string; // base64 encoded image
@@ -18,80 +18,79 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, context, image }: GeminiRequest = await req.json();
+    const { prompt, context, image }: ChatRequest = await req.json();
 
     if (!prompt) {
       throw new Error('Prompt is required');
     }
 
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY not configured');
+    const openrouterApiKey = Deno.env.get('OPENROUTER_API_KEY');
+    if (!openrouterApiKey) {
+      throw new Error('OPENROUTER_API_KEY not configured');
     }
 
-    const systemPrompt = context || "You are a helpful dating and relationship assistant for RizzMate. Provide friendly, supportive, and engaging advice.";
+    const systemPrompt = context || "You are a helpful dating and relationship assistant for RizzMate. You understand and can respond in English, Hindi, and Hinglish (Hindi-English mix). Provide friendly, supportive, and engaging advice in the same language as the user's input.";
 
-    // Prepare content parts
-    const contentParts: any[] = [{
-      text: `${systemPrompt}\n\nUser: ${prompt}`
-    }];
-
-    // Add image if provided
-    if (image) {
-      contentParts.push({
-        inline_data: {
-          mime_type: "image/jpeg",
-          data: image
-        }
-      });
-    }
-
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    // Prepare messages
+    const messages: any[] = [
+      {
+        role: "system",
+        content: systemPrompt
       },
-      body: JSON.stringify({
-        contents: [{
-          parts: contentParts
-        }],
-        generationConfig: {
-          temperature: 0.9,
-          topK: 1,
-          topP: 1,
-          maxOutputTokens: 2048,
-        },
-        safetySettings: [
+      {
+        role: "user",
+        content: prompt
+      }
+    ];
+
+    // Add image if provided (for vision models)
+    if (image) {
+      messages[1] = {
+        role: "user",
+        content: [
           {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            type: "text",
+            text: prompt
           },
           {
-            category: "HARM_CATEGORY_HATE_SPEECH",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            type: "image_url",
+            image_url: {
+              url: `data:image/jpeg;base64,${image}`
+            }
           }
         ]
+      };
+    }
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openrouterApiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://rizzmate.app',
+        'X-Title': 'RizzMate'
+      },
+      body: JSON.stringify({
+        model: image ? "deepseek/deepseek-r1" : "deepseek/deepseek-r1",
+        messages: messages,
+        temperature: 0.9,
+        max_tokens: 2048,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Gemini API error: ${errorData.error?.message || 'Unknown error'}`);
+      throw new Error(`OpenRouter API error: ${errorData.error?.message || 'Unknown error'}`);
     }
 
     const data = await response.json();
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const generatedText = data.choices?.[0]?.message?.content;
 
     if (!generatedText) {
-      throw new Error('No response generated from Gemini');
+      throw new Error('No response generated from DeepSeek');
     }
 
     return new Response(JSON.stringify({ 
@@ -102,7 +101,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in gemini-chat function:', error);
+    console.error('Error in deepseek-chat function:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
       success: false 
