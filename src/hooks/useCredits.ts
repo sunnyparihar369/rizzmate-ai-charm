@@ -3,7 +3,7 @@ import { useUser } from '@clerk/clerk-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-export const useCredits = () => {
+export const useCredits = (onCreditsExhausted?: () => void) => {
   const { user } = useUser();
   const [credits, setCredits] = useState<number>(0);
   const [loading, setLoading] = useState(true);
@@ -46,11 +46,7 @@ export const useCredits = () => {
       // Handle guest credits
       const currentCredits = getGuestCredits();
       if (currentCredits <= 0) {
-        toast({
-          title: "No credits remaining",
-          description: "Sign up to get 100 free credits!",
-          variant: "destructive"
-        });
+        onCreditsExhausted?.();
         return false;
       }
       
@@ -59,11 +55,8 @@ export const useCredits = () => {
       setCredits(newCredits);
       
       if (newCredits === 0) {
-        toast({
-          title: "Credits exhausted",
-          description: "Sign up to get 100 more credits!",
-          variant: "destructive"
-        });
+        // Trigger the login popup after the next credit usage attempt
+        setTimeout(() => onCreditsExhausted?.(), 1000);
       }
       return true;
     }

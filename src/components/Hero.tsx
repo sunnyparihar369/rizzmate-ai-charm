@@ -1,7 +1,11 @@
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-image.jpg";
 
-const Hero = () => {
+interface HeroProps {
+  onStartCharming?: () => void;
+}
+
+const Hero = ({ onStartCharming }: HeroProps) => {
   return (
     <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Animated background gradient */}
@@ -52,9 +56,9 @@ const Hero = () => {
               variant="hero" 
               size="xl" 
               className="text-lg"
-              onClick={() => {
+              onClick={onStartCharming || (() => {
                 document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-              }}
+              })}
             >
               Start Charming Now ✨
             </Button>
