@@ -1,10 +1,36 @@
 import { Button } from "@/components/ui/button";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/clerk-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useUser();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) throw error;
+        setIsAdmin(data?.is_admin || false);
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-border/50">
@@ -83,6 +109,15 @@ const Navigation = () => {
               </Button>
             </SignedOut>
             <SignedIn>
+              {isAdmin && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => navigate('/admin')}
+                >
+                  Admin Panel
+                </Button>
+              )}
               <UserButton />
             </SignedIn>
           </div>

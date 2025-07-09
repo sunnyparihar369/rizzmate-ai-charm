@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Copy, Sparkles, MessageCircle, Loader2 } from "lucide-react";
+import { useCredits } from "@/hooks/useCredits";
+import { Upload, Copy, Sparkles, MessageCircle, Loader2, CreditCard } from "lucide-react";
 
 const RizzMateApp = () => {
   const [screenshot, setScreenshot] = useState<File | null>(null);
@@ -16,6 +17,7 @@ const RizzMateApp = () => {
   const [generatedReply, setGeneratedReply] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { toast } = useToast();
+  const { credits, loading: creditsLoading, useCredit } = useCredits();
 
   const tones = [
     { id: "flirty", label: "Flirty", emoji: "😍" },
@@ -63,6 +65,12 @@ const RizzMateApp = () => {
         description: "Please upload a screenshot or paste conversation text",
         variant: "destructive"
       });
+      return;
+    }
+
+    // Check and use credit before proceeding
+    const canProceed = await useCredit();
+    if (!canProceed) {
       return;
     }
 
@@ -155,6 +163,12 @@ Return ONLY the reply text, no explanations or quotes.`;
             <p className="text-xl text-muted-foreground">
               Upload a screenshot or paste your conversation to get the perfect reply
             </p>
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <CreditCard className="h-5 w-5 text-primary" />
+              <Badge variant="outline" className="text-lg px-3 py-1">
+                {creditsLoading ? "Loading..." : `${credits} Credits`}
+              </Badge>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">

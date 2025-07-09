@@ -14,7 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      credit_transactions: {
+        Row: {
+          action_type: string
+          created_at: string
+          credits_used: number
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          credits_used: number
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          credits_used?: number
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          credits: number
+          email: string | null
+          full_name: string | null
+          id: string
+          is_admin: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_admin?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_admin?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
