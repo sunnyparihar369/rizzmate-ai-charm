@@ -117,11 +117,16 @@ Return ONLY the reply text, no explanations or quotes.`;
         requestBody.image = imageData;
       }
 
+      console.log('Calling openrouter-chat with:', requestBody);
       const { data, error } = await supabase.functions.invoke('openrouter-chat', {
         body: requestBody
       });
 
-      if (error) throw error;
+      console.log('OpenRouter response:', { data, error });
+      if (error) {
+        console.error('OpenRouter error details:', error);
+        throw error;
+      }
 
       if (data?.response) {
         setGeneratedReply(data.response);
@@ -129,6 +134,9 @@ Return ONLY the reply text, no explanations or quotes.`;
           title: "Reply generated! ✨",
           description: "Your perfect response is ready to copy"
         });
+      } else {
+        console.error('No response in data:', data);
+        throw new Error('No response received from OpenRouter');
       }
     } catch (error) {
       console.error('Error analyzing conversation:', error);
