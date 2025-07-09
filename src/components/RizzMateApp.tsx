@@ -7,10 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useCredits } from "@/hooks/useCredits";
-import { Upload, Copy, Sparkles, MessageCircle, Loader2, CreditCard } from "lucide-react";
-import LoginPromptDialog from "./LoginPromptDialog";
-import OutOfCreditsDialog from "./OutOfCreditsDialog";
+import { Upload, Copy, Sparkles, MessageCircle, Loader2 } from "lucide-react";
 
 const RizzMateApp = () => {
   const [screenshot, setScreenshot] = useState<File | null>(null);
@@ -18,14 +15,7 @@ const RizzMateApp = () => {
   const [selectedTone, setSelectedTone] = useState("flirty");
   const [generatedReply, setGeneratedReply] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [showOutOfCredits, setShowOutOfCredits] = useState(false);
   const { toast } = useToast();
-  
-  const { credits, loading: creditsLoading, useCredit } = useCredits(
-    () => setShowLoginPrompt(true),
-    () => setShowOutOfCredits(true)
-  );
 
   const tones = [
     { id: "flirty", label: "Flirty", emoji: "😍" },
@@ -73,12 +63,6 @@ const RizzMateApp = () => {
         description: "Please upload a screenshot or paste conversation text",
         variant: "destructive"
       });
-      return;
-    }
-
-    // Check and use credit before proceeding
-    const canProceed = await useCredit();
-    if (!canProceed) {
       return;
     }
 
@@ -169,16 +153,7 @@ Return ONLY the reply text, no explanations or quotes.`;
   };
 
   return (
-    <>
-      <LoginPromptDialog 
-        open={showLoginPrompt} 
-        onOpenChange={setShowLoginPrompt} 
-      />
-      <OutOfCreditsDialog 
-        open={showOutOfCredits} 
-        onOpenChange={setShowOutOfCredits} 
-      />
-      <div className="min-h-screen bg-gradient-card pt-20">
+    <div className="min-h-screen bg-gradient-card pt-20">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
@@ -188,12 +163,6 @@ Return ONLY the reply text, no explanations or quotes.`;
             <p className="text-xl text-muted-foreground">
               Upload a screenshot or paste your conversation to get the perfect reply
             </p>
-            <div className="flex items-center justify-center gap-2 mt-4">
-              <CreditCard className="h-5 w-5 text-primary" />
-              <Badge variant="outline" className="text-lg px-3 py-1">
-                {creditsLoading ? "Loading..." : `${credits} Credits`}
-              </Badge>
-            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -316,7 +285,6 @@ Return ONLY the reply text, no explanations or quotes.`;
         </div>
       </div>
     </div>
-    </>
   );
 };
 
