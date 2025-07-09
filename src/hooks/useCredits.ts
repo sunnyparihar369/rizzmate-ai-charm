@@ -25,14 +25,45 @@ export const useCredits = (onCreditsExhausted?: () => void, onLoggedInUserCredit
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      // First try to get the user's profile
+      let { data, error } = await supabase
         .from('profiles')
         .select('credits')
         .eq('user_id', user.id)
         .single();
 
-      if (error) throw error;
-      setCredits(data?.credits || 0);
+      // If profile doesn't exist, create it
+      if (error && error.code === 'PGRST116') {
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            email: user.primaryEmailAddress?.emailAddress || '',
+            full_name: user.fullName || '',
+            credits: 100,
+            is_admin: user.primaryEmailAddress?.emailAddress === 'classroom2cash@gmail.com'
+          });
+
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+          setLoading(false);
+          return;
+        }
+
+        // Fetch the newly created profile
+        const { data: newData, error: newError } = await supabase
+          .from('profiles')
+          .select('credits')
+          .eq('user_id', user.id)
+          .single();
+
+        if (newError) throw newError;
+        setCredits(newData?.credits || 100);
+      } else if (error) {
+        throw error;
+      } else {
+        setCredits(data?.credits || 0);
+      }
     } catch (error) {
       console.error('Error fetching credits:', error);
     } finally {
