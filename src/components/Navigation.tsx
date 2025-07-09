@@ -10,7 +10,7 @@ const Navigation = () => {
   const { user } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Check if user is admin
+  // Check if user is admin - simplified for Clerk
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user) {
@@ -18,36 +18,38 @@ const Navigation = () => {
         return;
       }
 
-      console.log(`Navigation: Checking admin status for user: ${user.primaryEmailAddress?.emailAddress}`);
+      // Simple check - if user email matches admin email, they're admin
+      if (user.primaryEmailAddress?.emailAddress === 'classroom2cash@gmail.com') {
+        setIsAdmin(true);
+        
+        // Create profile if it doesn't exist
+        try {
+          const { data: existingProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
 
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('is_admin, email')
-          .eq('user_id', user.id)
-          .single();
-
-        if (error) {
-          console.log('Navigation: Profile not found or error:', error);
-          setIsAdmin(false);
-          return;
+          if (!existingProfile) {
+            await supabase
+              .from('profiles')
+              .insert({
+                user_id: user.id,
+                email: user.primaryEmailAddress?.emailAddress,
+                full_name: user.fullName || '',
+                credits: 1000,
+                is_admin: true
+              });
+          }
+        } catch (error) {
+          console.log('Creating admin profile:', error);
         }
-
-        console.log('Navigation: Profile found:', data);
-        const adminStatus = data?.is_admin || false;
-        setIsAdmin(adminStatus);
-        console.log(`Navigation: Admin status set to: ${adminStatus}`);
-      } catch (error) {
-        console.error('Navigation: Error checking admin status:', error);
+      } else {
         setIsAdmin(false);
       }
     };
 
     checkAdminStatus();
-
-    // Listen for profile creation events
-    const interval = setInterval(checkAdminStatus, 3000);
-    return () => clearInterval(interval);
   }, [user]);
 
   return (
@@ -127,14 +129,11 @@ const Navigation = () => {
               </Button>
             </SignedOut>
             <SignedIn>
-              {isAdmin && location.pathname === '/' && (
+              {isAdmin && (
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={() => {
-                    // Dispatch custom event to show admin panel
-                    window.dispatchEvent(new CustomEvent('showAdmin'));
-                  }}
+                  onClick={() => navigate('/admin')}
                 >
                   Admin Panel
                 </Button>

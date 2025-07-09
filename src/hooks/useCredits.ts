@@ -34,14 +34,15 @@ export const useCredits = (onCreditsExhausted?: () => void, onLoggedInUserCredit
 
       // If profile doesn't exist, create it
       if (error && error.code === 'PGRST116') {
+        const isAdminUser = user.primaryEmailAddress?.emailAddress === 'classroom2cash@gmail.com';
         const { error: insertError } = await supabase
           .from('profiles')
           .insert({
             user_id: user.id,
             email: user.primaryEmailAddress?.emailAddress || '',
             full_name: user.fullName || '',
-            credits: 100,
-            is_admin: user.primaryEmailAddress?.emailAddress === 'classroom2cash@gmail.com'
+            credits: isAdminUser ? 1000 : 100,
+            is_admin: isAdminUser
           });
 
         if (insertError) {
