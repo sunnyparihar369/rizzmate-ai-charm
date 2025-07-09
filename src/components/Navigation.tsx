@@ -109,11 +109,14 @@ const Navigation = () => {
               </Button>
             </SignedOut>
             <SignedIn>
-              {isAdmin && (
+              {isAdmin && location.pathname === '/' && (
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={() => navigate('/admin')}
+                  onClick={() => {
+                    // Dispatch custom event to show admin panel
+                    window.dispatchEvent(new CustomEvent('showAdmin'));
+                  }}
                 >
                   Admin Panel
                 </Button>
