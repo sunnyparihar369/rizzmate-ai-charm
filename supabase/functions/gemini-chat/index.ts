@@ -25,8 +25,11 @@ serve(async (req) => {
     }
 
     const openrouterApiKey = Deno.env.get('OPENROUTER_API_KEY');
+    console.log('OpenRouter API Key configured:', !!openrouterApiKey);
+    
     if (!openrouterApiKey) {
-      throw new Error('OPENROUTER_API_KEY not configured');
+      console.error('OPENROUTER_API_KEY not found in environment');
+      throw new Error('OPENROUTER_API_KEY not configured. Please add it in Supabase Edge Function Secrets.');
     }
 
     const systemPrompt = context || "You are a helpful dating and relationship assistant for RizzMate. You understand and can respond in English, Hindi, and Hinglish (Hindi-English mix). Provide friendly, supportive, and engaging advice in the same language as the user's input.";
