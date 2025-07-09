@@ -10,46 +10,13 @@ const Navigation = () => {
   const { user } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Check if user is admin - simplified for Clerk
+  // Simple admin check for Clerk
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        return;
-      }
-
-      // Simple check - if user email matches admin email, they're admin
-      if (user.primaryEmailAddress?.emailAddress === 'classroom2cash@gmail.com') {
-        setIsAdmin(true);
-        
-        // Create profile if it doesn't exist
-        try {
-          const { data: existingProfile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', user.id)
-            .single();
-
-          if (!existingProfile) {
-            await supabase
-              .from('profiles')
-              .insert({
-                user_id: user.id,
-                email: user.primaryEmailAddress?.emailAddress,
-                full_name: user.fullName || '',
-                credits: 1000,
-                is_admin: true
-              });
-          }
-        } catch (error) {
-          console.log('Creating admin profile:', error);
-        }
-      } else {
-        setIsAdmin(false);
-      }
-    };
-
-    checkAdminStatus();
+    if (user?.primaryEmailAddress?.emailAddress === 'classroom2cash@gmail.com') {
+      setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
+    }
   }, [user]);
 
   return (

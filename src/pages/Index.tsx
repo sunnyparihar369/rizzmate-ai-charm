@@ -18,47 +18,17 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { user } = useUser();
 
-  // Use credits hook to trigger profile creation immediately when user signs in
+  // Use credits hook to ensure profile exists
   const { credits, loading } = useCredits();
 
-  // Check if user is admin
+  // Simple admin check
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        return;
-      }
-
-      console.log(`Checking admin status for user: ${user.primaryEmailAddress?.emailAddress}`);
-
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('is_admin, email')
-          .eq('user_id', user.id)
-          .single();
-
-        if (error) {
-          console.log('Profile not found or error:', error);
-          // If profile doesn't exist yet, wait a bit and try again
-          if (error.code === 'PGRST116') {
-            console.log('Profile not found, will retry in 2 seconds...');
-            setTimeout(() => checkAdminStatus(), 2000);
-          }
-          return;
-        }
-
-        console.log('Profile found:', data);
-        const adminStatus = data?.is_admin || false;
-        setIsAdmin(adminStatus);
-        console.log(`Admin status set to: ${adminStatus}`);
-      } catch (error) {
-        console.error('Error checking admin status:', error);
-      }
-    };
-
-    checkAdminStatus();
-  }, [user, credits]); // Add credits as dependency to recheck when profile is created
+    if (user?.primaryEmailAddress?.emailAddress === 'classroom2cash@gmail.com') {
+      setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   // Listen for admin panel show event
   useEffect(() => {

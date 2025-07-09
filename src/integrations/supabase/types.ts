@@ -76,14 +76,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_current_user_profile: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      is_current_user_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
       setup_admin: {
         Args: { user_email: string }
         Returns: boolean
