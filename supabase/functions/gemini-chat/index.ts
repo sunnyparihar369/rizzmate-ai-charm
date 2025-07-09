@@ -71,7 +71,7 @@ serve(async (req) => {
         'X-Title': 'RizzMate'
       },
       body: JSON.stringify({
-        model: image ? "deepseek/deepseek-r1" : "deepseek/deepseek-r1",
+        model: image ? "deepseek/deepseek-r1:free" : "deepseek/deepseek-r1:free",
         messages: messages,
         temperature: 0.9,
         max_tokens: 2048,
