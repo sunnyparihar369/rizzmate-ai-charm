@@ -90,7 +90,7 @@ serve(async (req) => {
     const generatedText = data.choices?.[0]?.message?.content;
 
     if (!generatedText) {
-      throw new Error('No response generated from DeepSeek');
+      throw new Error('No response generated from OpenRouter');
     }
 
     return new Response(JSON.stringify({ 
@@ -101,7 +101,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in deepseek-chat function:', error);
+    console.error('Error in openrouter-chat function:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
       success: false 
