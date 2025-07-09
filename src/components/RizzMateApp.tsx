@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCredits } from "@/hooks/useCredits";
 import { Upload, Copy, Sparkles, MessageCircle, Loader2, CreditCard } from "lucide-react";
 import LoginPromptDialog from "./LoginPromptDialog";
+import OutOfCreditsDialog from "./OutOfCreditsDialog";
 
 const RizzMateApp = () => {
   const [screenshot, setScreenshot] = useState<File | null>(null);
@@ -18,11 +19,13 @@ const RizzMateApp = () => {
   const [generatedReply, setGeneratedReply] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [showOutOfCredits, setShowOutOfCredits] = useState(false);
   const { toast } = useToast();
   
-  const { credits, loading: creditsLoading, useCredit } = useCredits(() => {
-    setShowLoginPrompt(true);
-  });
+  const { credits, loading: creditsLoading, useCredit } = useCredits(
+    () => setShowLoginPrompt(true),
+    () => setShowOutOfCredits(true)
+  );
 
   const tones = [
     { id: "flirty", label: "Flirty", emoji: "😍" },
@@ -162,6 +165,10 @@ Return ONLY the reply text, no explanations or quotes.`;
       <LoginPromptDialog 
         open={showLoginPrompt} 
         onOpenChange={setShowLoginPrompt} 
+      />
+      <OutOfCreditsDialog 
+        open={showOutOfCredits} 
+        onOpenChange={setShowOutOfCredits} 
       />
       <div className="min-h-screen bg-gradient-card pt-20">
       <div className="container mx-auto px-4 py-8">

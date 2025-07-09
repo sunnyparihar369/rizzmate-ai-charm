@@ -30,7 +30,18 @@ const Index = () => {
         )}
       </SignedOut>
       <SignedIn>
-        <RizzMateApp />
+        {!showApp ? (
+          <>
+            <Hero onStartCharming={() => setShowApp(true)} />
+            <Features />
+            <HowItWorks />
+            <Pricing />
+            <CTA />
+            <Footer />
+          </>
+        ) : (
+          <RizzMateApp />
+        )}
       </SignedIn>
     </div>
   );
