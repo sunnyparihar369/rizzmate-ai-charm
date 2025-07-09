@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCredits } from "@/hooks/useCredits";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import Features from "@/components/Features";
@@ -17,27 +18,47 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { user } = useUser();
 
+  // Use credits hook to trigger profile creation immediately when user signs in
+  const { credits, loading } = useCredits();
+
   // Check if user is admin
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!user) return;
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      console.log(`Checking admin status for user: ${user.primaryEmailAddress?.emailAddress}`);
 
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('is_admin')
+          .select('is_admin, email')
           .eq('user_id', user.id)
           .single();
 
-        if (error) throw error;
-        setIsAdmin(data?.is_admin || false);
+        if (error) {
+          console.log('Profile not found or error:', error);
+          // If profile doesn't exist yet, wait a bit and try again
+          if (error.code === 'PGRST116') {
+            console.log('Profile not found, will retry in 2 seconds...');
+            setTimeout(() => checkAdminStatus(), 2000);
+          }
+          return;
+        }
+
+        console.log('Profile found:', data);
+        const adminStatus = data?.is_admin || false;
+        setIsAdmin(adminStatus);
+        console.log(`Admin status set to: ${adminStatus}`);
       } catch (error) {
         console.error('Error checking admin status:', error);
       }
     };
 
     checkAdminStatus();
-  }, [user]);
+  }, [user, credits]); // Add credits as dependency to recheck when profile is created
 
   // Listen for admin panel show event
   useEffect(() => {

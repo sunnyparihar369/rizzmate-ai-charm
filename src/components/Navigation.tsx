@@ -13,23 +13,41 @@ const Navigation = () => {
   // Check if user is admin
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!user) return;
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      console.log(`Navigation: Checking admin status for user: ${user.primaryEmailAddress?.emailAddress}`);
 
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('is_admin')
+          .select('is_admin, email')
           .eq('user_id', user.id)
           .single();
 
-        if (error) throw error;
-        setIsAdmin(data?.is_admin || false);
+        if (error) {
+          console.log('Navigation: Profile not found or error:', error);
+          setIsAdmin(false);
+          return;
+        }
+
+        console.log('Navigation: Profile found:', data);
+        const adminStatus = data?.is_admin || false;
+        setIsAdmin(adminStatus);
+        console.log(`Navigation: Admin status set to: ${adminStatus}`);
       } catch (error) {
-        console.error('Error checking admin status:', error);
+        console.error('Navigation: Error checking admin status:', error);
+        setIsAdmin(false);
       }
     };
 
     checkAdminStatus();
+
+    // Listen for profile creation events
+    const interval = setInterval(checkAdminStatus, 3000);
+    return () => clearInterval(interval);
   }, [user]);
 
   return (
