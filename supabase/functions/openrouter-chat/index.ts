@@ -24,9 +24,9 @@ serve(async (req) => {
       throw new Error('Prompt is required');
     }
 
-    const openrouterApiKey = Deno.env.get('OPENROUTER_API_KEY');
-    if (!openrouterApiKey) {
-      throw new Error('OPENROUTER_API_KEY not configured');
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) {
+      throw new Error('OPENAI_API_KEY not configured');
     }
 
     const systemPrompt = context || "You are a helpful dating and relationship assistant for RizzMate. You understand and can respond in English, Hindi, and Hinglish (Hindi-English mix). Provide friendly, supportive, and engaging advice in the same language as the user's input.";
@@ -62,35 +62,30 @@ serve(async (req) => {
       };
     }
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openrouterApiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://rizzmate.app',
-        'X-Title': 'RizzMate'
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: image ? "meta-llama/llama-3.3-70b-instruct:free" : "meta-llama/llama-3.3-70b-instruct:free",
+        model: "gpt-4o-mini",
         messages: messages,
         temperature: 0.9,
-        max_tokens: 2048,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0
+        max_tokens: 150
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`OpenRouter API error: ${errorData.error?.message || 'Unknown error'}`);
+      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
     }
 
     const data = await response.json();
     const generatedText = data.choices?.[0]?.message?.content;
 
     if (!generatedText) {
-      throw new Error('No response generated from OpenRouter');
+      throw new Error('No response generated from OpenAI');
     }
 
     return new Response(JSON.stringify({ 
@@ -101,7 +96,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in openrouter-chat function:', error);
+    console.error('Error in openai-chat function:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
       success: false 
