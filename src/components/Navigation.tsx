@@ -10,13 +10,26 @@ const Navigation = () => {
   const { user } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Simple admin check for Clerk
+  // Check if user is admin
   useEffect(() => {
-    if (user?.primaryEmailAddress?.emailAddress === 'classroom2cash@gmail.com') {
-      setIsAdmin(true);
-    } else {
-      setIsAdmin(false);
-    }
+    const checkAdminStatus = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) throw error;
+        setIsAdmin(data?.is_admin || false);
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+      }
+    };
+
+    checkAdminStatus();
   }, [user]);
 
   return (
