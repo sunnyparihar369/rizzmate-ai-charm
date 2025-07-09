@@ -127,7 +127,7 @@ Return ONLY the reply text, no explanations or quotes.`;
 
       console.log('🔄 Calling edge function...', { hasImage: !!imageData, promptLength: analysisPrompt.length });
 
-      const { data, error } = await supabase.functions.invoke('gemini-chat', {
+      const { data, error } = await supabase.functions.invoke('openrouter-chat', {
         body: requestBody
       });
 

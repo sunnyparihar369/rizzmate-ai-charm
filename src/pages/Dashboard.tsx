@@ -78,7 +78,7 @@ Generate a ${selectedTone} reply that is:
 
 Return ONLY the reply text, no explanations or quotes.`;
 
-      const { data, error } = await supabase.functions.invoke('gemini-chat', {
+      const { data, error } = await supabase.functions.invoke('openrouter-chat', {
         body: {
           prompt: analysisPrompt,
           context: contextPrompt
