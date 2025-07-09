@@ -48,20 +48,11 @@ serve(async (req) => {
 
     // Add image if provided (for vision models)
     if (image) {
+      // For now, let's skip image processing as the free model doesn't support vision
+      console.log('Image provided but using text-only model');
       messages[1] = {
         role: "user",
-        content: [
-          {
-            type: "text",
-            text: prompt
-          },
-          {
-            type: "image_url",
-            image_url: {
-              url: `data:image/jpeg;base64,${image}`
-            }
-          }
-        ]
+        content: prompt + " (Note: Image was provided but cannot be processed with current model)"
       };
     }
 
@@ -74,10 +65,10 @@ serve(async (req) => {
         'X-Title': 'RizzMate'
       },
       body: JSON.stringify({
-        model: image ? "gpt-4o" : "meta-llama/llama-3.1-8b-instruct:free",
+        model: "meta-llama/llama-3.3-70b-instruct:free",
         messages: messages,
-        temperature: 0.9,
-        max_tokens: 2048,
+        temperature: 0.7,
+        max_tokens: 1000,
         top_p: 1,
         frequency_penalty: 0,
         presence_penalty: 0
@@ -86,7 +77,12 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenRouter API error:', response.status, errorText);
+      console.error('OpenRouter API full error:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
       throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
     }
 
