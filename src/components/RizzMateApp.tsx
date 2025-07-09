@@ -67,6 +67,9 @@ const RizzMateApp = () => {
   };
 
   const analyzeConversation = async () => {
+    console.log('🚀 Analysis started');
+    console.log('📝 Input:', { hasScreenshot: !!screenshot, conversationLength: conversationText.length });
+    
     if (!screenshot && !conversationText.trim()) {
       toast({
         title: "Missing input",
@@ -77,7 +80,9 @@ const RizzMateApp = () => {
     }
 
     // Check and use credit before proceeding
+    console.log('💳 Checking credits...');
     const canProceed = await useCredit();
+    console.log('💳 Credit check result:', canProceed);
     if (!canProceed) {
       return;
     }
@@ -88,10 +93,13 @@ const RizzMateApp = () => {
       let imageData = "";
       
       if (screenshot) {
+        console.log('🖼️ Converting screenshot to base64...');
         imageData = await convertImageToBase64(screenshot);
         analysisPrompt = `Analyze this dating app conversation screenshot and generate a ${selectedTone} reply. Please read the conversation in the image and create an engaging response that matches the ${selectedTone} tone.`;
+        console.log('✅ Screenshot converted');
       } else {
         analysisPrompt = `Analyze this dating app conversation and generate a ${selectedTone} reply: "${conversationText}"`;
+        console.log('📝 Using text input');
       }
 
       const contextPrompt = `You are RizzMate, an AI dating assistant. Your job is to analyze dating app conversations and generate perfect replies. 
@@ -117,28 +125,40 @@ Return ONLY the reply text, no explanations or quotes.`;
         requestBody.image = imageData;
       }
 
+      console.log('🔄 Calling edge function...', { hasImage: !!imageData, promptLength: analysisPrompt.length });
+
       const { data, error } = await supabase.functions.invoke('gemini-chat', {
         body: requestBody
       });
 
-      if (error) throw error;
+      console.log('📡 Edge function response:', { data, error });
+
+      if (error) {
+        console.error('❌ Edge function error:', error);
+        throw error;
+      }
 
       if (data?.response) {
+        console.log('✅ Reply generated successfully');
         setGeneratedReply(data.response);
         toast({
           title: "Reply generated! ✨",
           description: "Your perfect response is ready to copy"
         });
+      } else {
+        console.error('❌ No response in data:', data);
+        throw new Error('No response received from AI');
       }
     } catch (error) {
-      console.error('Error analyzing conversation:', error);
+      console.error('💥 Error analyzing conversation:', error);
       toast({
         title: "Analysis failed",
-        description: "Please try again or check your connection",
+        description: error.message || "Please try again or check your connection",
         variant: "destructive"
       });
     } finally {
       setIsAnalyzing(false);
+      console.log('🏁 Analysis completed');
     }
   };
 
