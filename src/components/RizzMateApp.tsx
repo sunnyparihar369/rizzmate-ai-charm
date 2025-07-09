@@ -117,7 +117,7 @@ Return ONLY the reply text, no explanations or quotes.`;
         requestBody.image = imageData;
       }
 
-      const { data, error } = await supabase.functions.invoke('gemini-chat', {
+      const { data, error } = await supabase.functions.invoke('openrouter-chat', {
         body: requestBody
       });
 
